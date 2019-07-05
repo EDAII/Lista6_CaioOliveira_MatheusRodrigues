@@ -1,12 +1,14 @@
-var matrix = [];
+var matriz = [];
 var grafo = [];
-const nos = 6;
+const NOS = 6;
 var noInicial;
 var pilha = [];
 var visitados = []
+var matrizAux = []
+var proxElem;
+var flag;
 
-
-function setup() {
+async function setup() {
   noInicial = parseInt(random(0,5));  
   createCanvas(800,800);
   background(0)
@@ -16,26 +18,42 @@ function setup() {
   var posicoes = []
   valores.push(0)
   valores.push(1)
+  frameRate(1)
+
   //Cria martiz de adjacencia 
-  for ( let y = 0; y < nos; y++ ) {
-    matrix[ y ] = [];
-    for ( let x = 0; x < nos; x++ ) {
-        matrix[ y ][ x ] = random(valores);
+  for ( let y = 0; y < NOS; y++ ) {
+    matriz[ y ] = [];
+    for ( let x = 0; x < NOS; x++ ) {
+        matriz[ y ][ x ] = random(valores);
     }
   }
-  //Cria grafo
-  for(let i = 0; i < nos; i++){
-    posicoes = calcPosicao(i+1)
-    grafo.push(new No(posicoes[0] ,posicoes[1],matrix[i],i))
+  
+  //Arruma vizinhos 
+  for(let i = 0; i< NOS; i++){
+    matrizAux[i] = []
+    for(let k = 0;k <  NOS;k++){
+      matrizAux[i].push((matriz[i][k]+matriz[k][i]))
+      if(matrizAux[i][k] === 2){
+        matrizAux[i][k] = 1;
+      }
+    }
   }
 
-  DFS(noInicial)
+  //Cria grafo
+  for(let i = 0; i < NOS; i++){
+    posicoes = calcPosicao(i+1)
+    grafo.push(new No(posicoes[0] ,posicoes[1],matrizAux[i],i))
+  }
   
   
+  console.log("Visitados",visitados)
   
-  //console.log(grafo)
-  console.log(matrix.join('\n'))
+  await DFS(noInicial)
 
+  //console.log(grafo)
+  console.log(matriz)
+  console.log(matrizAux)
+  
 }
 
 function calcPosicao(i){
@@ -70,68 +88,70 @@ function calcPosicao(i){
   return posicoes;
 }
 
-function draw() {
+async function draw() {
   
   fill(255)
   noStroke()
   text("DFS",370,100)
   text("Pilha",650,100)
   
-  stroke(255)
-  fill(0)
-  rect(650,150,60,60)
-  noStroke()
   fill(255)
-   
   
-  for(let i = 0; i < nos; i++){
+  for(let i = 0; i < NOS; i++){
     
     fill(255)
     stroke(255)
-    for(let j = 0; j < nos;j++){
-      if(grafo[i].vizinhos[j] === 1){
+    for(let j = 0; j < NOS;j++){
+        if(grafo[i].vizinhos[j] === 1){
         line(grafo[i].x,grafo[i].y,grafo[j].x,grafo[j].y)
+      }
+      if(grafo[i].visitado){
+        fill(0,255,0)
       }
       circle(grafo[i].x,grafo[i].y,50)
     }
     fill(0)
     text(i,grafo[i].x,grafo[i].y)    
   }
-}
 
-function DFS(elemento){
-  
-  visitados.push(grafo[elemento]);  
-
-  for(let i = 0; i < nos;i++){
-    if(grafo[elemento].vizinhos[i] === 1){
-      pilha.push(grafo[i])
-      console.log("adicionado "+i+" a pilha de visitados")
-    }   
-  }
-  
-  let primeiroFila = pilha.splice(0,1);
-  if(visitados.length === 6){
+  if(pilha.length === 0 ){
+    grafo[proxElem.index].visitado = true;
+    visitados.push(grafo[proxElem.index])
+    flag = true
     return
   }
-  DFS(primeiroFila[0].index)
+  
+  if(flag){
+    noLoop()
+  }
+
+  await DFS(proxElem.index);
 
 }
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+async function DFS(elemento){
+ 
+  console.log("Elemento sendo visitado: ",elemento)
+  grafo[elemento].visitado = true;
+  await visitados.push(grafo[elemento])
+    for(let i = 0;i < NOS;i++){
+      if(grafo[elemento].vizinhos[i] === 1 && grafo[i].visitado === false && grafo[i].naPilha === false){
+        pilha.push(grafo[i])
+        grafo[i].naPilha = true
+      }
+    }  
+    proxElem = await pilha.shift()
+  }
 
 class No{
-    constructor(x,y,vizinhos,index){
+    constructor(x,y,vizinhos,index,naPilha){
         this.x = x
         this.y = y;
         this.vizinhos = vizinhos;
         this.index = index;
         this.visitado = false
+        this.naPilha = false
     }
 }
-
-
 
 
