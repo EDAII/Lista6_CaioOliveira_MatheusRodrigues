@@ -18,7 +18,7 @@ async function setup() {
   var posicoes = []
   valores.push(0)
   valores.push(1)
-  frameRate(1)
+  frameRate(0.5)
 
   //Cria martiz de adjacencia 
   for ( let y = 0; y < NOS; y++ ) {
@@ -89,14 +89,17 @@ function calcPosicao(i){
 }
 
 async function draw() {
-  
+  background(0);
   fill(255)
   noStroke()
   text("DFS",370,100)
   text("Pilha",650,100)
   
   fill(255)
-  
+  for(let i = pilha.length-1; i >= 0; i--){
+    text(pilha[i].index, 650, 200 + i*50);
+  }
+   
   for(let i = 0; i < NOS; i++){
     
     fill(255)
