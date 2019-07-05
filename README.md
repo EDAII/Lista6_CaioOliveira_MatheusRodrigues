@@ -5,4 +5,4 @@
 **Matrícula: 16/0015294**
 
 #### Utilização
-Para visualizar as simulações basta clicar nos arquivos index.html
+Para visualizar as simulações basta clicar no arquivo index.html
